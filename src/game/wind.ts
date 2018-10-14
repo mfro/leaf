@@ -36,5 +36,5 @@ lifecycle.hook('init', 'wind', app => {
   }
 
   toast(new Vec(0, 0), new Vec(500, size.y), new Vec(0, -2));
-  // toast(new Vec(0, 0), new Vec(size.x - 500, 500), new Vec(3, 0));
+  toast(new Vec(0, 0), new Vec(size.x - 500, 500), new Vec(3, 0));
 });

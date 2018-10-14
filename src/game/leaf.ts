@@ -10,9 +10,9 @@ import leafUrl from '@/assets/leaf-1.png';
 import leafSUrl from '@/assets/leaf-1-stretch.png';
 
 let constants = {
-  GRAV: 0.5,
-  DRAG: 0.994,
-  DRAG_MIN: 10,
+  GRAV: 0.8,
+  DRAG: 0.993,
+  DRAG_MIN: 0,
   CONTROLS: 0.014,
   ROTATION: 0.002,
 };
@@ -38,7 +38,11 @@ export function wall(newPos: Vec, dir: Vec) {
   rotation = -Math.PI / 2;
 }
 
-lifecycle.hook('init', 'leaf', app => {
+let app: pixi.Application;
+let floor = size.y - 6;
+
+lifecycle.hook('init', 'leaf', a => {
+  app = a;
   let basic = new pixi.Sprite(pixi.utils.TextureCache[leafUrl]);
   basic.texture.baseTexture.scaleMode = pixi.SCALE_MODES.NEAREST;
   basic.x = -8;
@@ -60,11 +64,6 @@ lifecycle.hook('init', 'leaf', app => {
   leaf.addChild(texture);
   camera.container.addChild(leaf);
 
-  // let debug = new pixi.Graphics();
-  // app.stage.addChild(debug);
-
-  let floor = size.y - 6;
-
   camera.follow(leaf);
 
   app.ticker.add(dT => {
@@ -74,11 +73,13 @@ lifecycle.hook('init', 'leaf', app => {
       pos = new Vec(pos.x, floor);
       upwards = new Vec(0, 1);
       rotation = 0;
-    } else if (!input.isDown(input.SPACE)) {
+    } else if (!input.isKeyDown(input.SPACE)) {
       pos = Vec.add(pos, vel);
-      pos = Vec.add(pos, new Vec(0, 0.5));
+      pos = Vec.add(pos, new Vec(0, 1));
 
       pos = Vec.add(pos, motion);
+
+      motion = Vec.polar(motion.len * 0.95, motion.dir);
 
       // let proj = Vec.polar(Vec.dot(motion, vel) / vel.len, vel.dir);
       // let remain = Vec.add(motion, Vec.polar(-proj.len, proj.dir));
@@ -86,28 +87,22 @@ lifecycle.hook('init', 'leaf', app => {
       // vel = Vec.add(vel, proj);
       // motion = remain;
 
-      motion = Vec.polar(motion.len * 0.86, motion.dir);
-
       let delta = Vec.delta(vel, upwards) / (Math.PI / 2);
       delta *= vel.len * constants.ROTATION;
 
-      if (input.isDown(input.LEFT))
+      if (input.isKeyDown(input.LEFT))
         delta -= constants.CONTROLS;
-      else if (input.isDown(input.RIGHT))
+      else if (input.isKeyDown(input.RIGHT))
         delta += constants.CONTROLS;
 
       vel = Vec.polar(vel.len, vel.dir + delta);
       upwards = Vec.polar(1, upwards.dir + delta);
-
       rotation += delta;
 
-      if (vel.y < 0) {
-        let grav = Vec.polar(-constants.GRAV, vel.dir);
-        vel = Vec.add(vel, grav);
-      } else {
-        let grav = Vec.polar(constants.GRAV, vel.dir);
-        vel = Vec.add(vel, grav);
-      }
+      let grav = constants.GRAV * Math.abs(vel.y / vel.len)
+      if (vel.y < 0)
+        grav = -grav;
+      vel = Vec.add(vel, Vec.polar(grav, vel.dir));
 
       if (vel.len < 1) {
         if (upwards.y > 0)
@@ -126,12 +121,9 @@ lifecycle.hook('init', 'leaf', app => {
     leaf.y = pos.y;
     leaf.rotation = rotation;
 
-    // debug.x = pos.x;
-    // debug.y = pos.y;
-
-    // debug.clear();
-    // debug.lineStyle(2, 0xFF0000, 1);
-    // debug.moveTo(0, 0);
-    // debug.lineTo(motion.x * 20, motion.y * 20);
+    if (input.isKeyDown(input.UP)) {
+      for (let i = 0; i < 100; ++i)
+        camera.confetti(new Vec(pos.x, pos.y));
+    }
   });
 });
