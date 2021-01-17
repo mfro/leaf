@@ -1,0 +1,33 @@
+{
+  "name": "fall",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "webpack -p",
+    "watch": "webpack --watch",
+    "serve": "webpack-dev-server --inline --hot"
+  },
+  "dependencies": {
+    "@babel/core": "^7.1.2",
+    "eventemitter3": "^3.1.0",
+    "pixi.js": "^4.8.2"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.1.0",
+    "@types/pixi.js": "^4.8.1",
+    "@types/webpack-env": "^1.13.6",
+    "autoprefixer": "^9.1.5",
+    "babel-loader": "^8.0.4",
+    "cache-loader": "^1.2.2",
+    "css-loader": "^1.0.0",
+    "file-loader": "^2.0.0",
+    "postcss-loader": "^3.0.0",
+    "style-loader": "^0.23.1",
+    "ts-loader": "^5.2.1",
+    "typescript": "^3.0.0",
+    "url-loader": "^1.1.2",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.9"
+  }
+}
