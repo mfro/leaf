@@ -1,13 +1,19 @@
 export const
+    ENTER = 13,
+    ESC = 27,
     SPACE = 32,
     LEFT = 37,
     UP = 38,
-    RIGHT = 39;
+    RIGHT = 39,
+    N1 = 49,
+    N2 = 50,
+    N3 = 51;
 
 let down = new Set<number>();
 let listeners = new Map<number, (() => void)[]>();
 
 window.addEventListener('keydown', e => {
+    console.debug(e.keyCode);
     if (down.has(e.keyCode))
         return;
 

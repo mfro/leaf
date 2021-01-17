@@ -18,7 +18,6 @@
     "@types/webpack-env": "^1.13.6",
     "autoprefixer": "^9.1.5",
     "babel-loader": "^8.0.4",
-    "cache-loader": "^1.2.2",
     "css-loader": "^1.0.0",
     "file-loader": "^2.0.0",
     "postcss-loader": "^3.0.0",

@@ -3,25 +3,68 @@ import { lifecycle, Vec, size } from '@/utils';
 
 import * as leaf from './leaf';
 import * as camera from './camera';
+import * as world from './world';
 
-lifecycle.hook('init', 'wind', app => {
-  function toast(pos: Vec, dims: Vec, force: Vec) {
-    let g = new pixi.Graphics();
-    g.beginFill(0x0000FF, 0.2)
-    g.drawRect(pos.x, pos.y, dims.x, dims.y);
-    g.endFill();
+import windSprite from '@/assets/wind.png';
 
-    camera.container.addChild(g);
+pixi.loader.add(windSprite);
 
-    app.ticker.add(dT => {
-      let collide = leaf.pos.x >= pos.x && leaf.pos.x < pos.x + dims.x &&
-        leaf.pos.y >= pos.y && leaf.pos.y < pos.y + dims.y;
+let FRAME_COUNT = 23;
+let FRAME = new Vec(64, 16);
+
+export function addWind(pos: Vec, dims: Vec, force: Vec, animate = true) {
+  let sprites: { anim: number, delay: number, sprite: pixi.Sprite }[] = [];
+  let ratio = .0000003 * Vec.dot(dims, dims) * force.len;
+  if (!animate) ratio = 0;
+
+  let delay = 0;
+  world.tick((dT) => {
+    if (delay > dT) {
+      delay -= dT;
+    } else {
+      delay = 1;
+      for (let i = sprites.length - 1; i >= 0; --i) {
+        let s = sprites[i];
+
+        if (--s.delay < 0) {
+          s.delay = 1;
+          ++s.anim;
+          if (s.anim == FRAME_COUNT) {
+            camera.container.removeChild(s.sprite);
+            sprites.splice(i, 1);
+          } else {
+            s.sprite.texture.frame = new pixi.Rectangle(0, FRAME.y * s.anim, FRAME.x, FRAME.y);
+          }
+        }
+      }
+
+      if (Math.random() < ratio) {
+        let t = new pixi.Texture(pixi.utils.TextureCache[windSprite]);
+        let s = new pixi.Sprite(t);
+        s.texture.baseTexture.scaleMode = pixi.SCALE_MODES.NEAREST;
+        camera.container.addChild(s);
+        s.anchor.x = 0.5;
+        s.anchor.y = 0.5;
+        s.rotation = force.dir;
+        s.x = pos.x + Math.random() * dims.x;
+        s.y = pos.y + Math.random() * dims.y;
+        s.scale = new pixi.Point(4, force.x < 0 ? -4 : 4);
+        s.texture.frame = new pixi.Rectangle(0, 0, FRAME.x, FRAME.y);
+        sprites.push({
+          anim: 0,
+          delay: 1,
+          sprite: s,
+        });
+      }
+
+      let collide = leaf.entity.position.x >= pos.x && leaf.entity.position.x < pos.x + dims.x &&
+        leaf.entity.position.y >= pos.y && leaf.entity.position.y < pos.y + dims.y;
 
       if (!collide) return;
 
       if (force.y > force.x) {
-        let sail1 = Vec.polar(1, leaf.vel.dir + Math.PI / 2);
-        let sail2 = Vec.polar(1, leaf.vel.dir - Math.PI / 2);
+        let sail1 = Vec.polar(1, leaf.entity.velocity.dir + Math.PI / 2);
+        let sail2 = Vec.polar(1, leaf.entity.velocity.dir - Math.PI / 2);
         let dot1 = Vec.dot(force, sail1);
         let dot2 = Vec.dot(force, sail2);
 
@@ -32,9 +75,6 @@ lifecycle.hook('init', 'wind', app => {
       } else {
         leaf.push(force);
       }
-    });
-  }
-
-  toast(new Vec(0, 0), new Vec(500, size.y), new Vec(0, -2));
-  toast(new Vec(0, 0), new Vec(size.x - 500, 500), new Vec(3, 0));
-});
+    }
+  });
+}

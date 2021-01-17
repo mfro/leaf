@@ -8,6 +8,9 @@ module.exports = {
     path: path.join(__dirname, "dist"),
     filename: "app.js"
   },
+  devServer: {
+    disableHostCheck: true
+  },
   resolve: {
     modules: [
       "node_modules",
@@ -85,13 +88,6 @@ module.exports = {
       {
         test: /\.ts$/,
         use: [
-          {
-            loader: 'cache-loader',
-            options: {
-              cacheDirectory: 'C:\\Users\\Max\\Desktop\\Projects\\fall\\fall\\node_modules\\.cache\\ts-loader',
-              cacheIdentifier: '47b0d504'
-            }
-          },
           {
             loader: 'babel-loader'
           },
